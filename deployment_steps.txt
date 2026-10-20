@@ -1,0 +1,27 @@
+nano ~/.drml_secrets
+
+
+GIT_REPO_URL=your_github_repo_https_url
+GITHUB_USERNAME=your_user_name
+GITHUB_TOKEN=your_github_token
+BRANCH=main
+
+
+chmod 600 ~/.drml_secrets
+
+
+nano deploy_drml.sh
+
+(fill the script)
+
+----------------------
+
+chmod +x deploy_drml.sh
+
+
+./deploy_drml.sh
+
+curl http://127.0.0.1:8000/api/health
+ps aux | grep -E "uvicorn|streamlit" | grep -v grep
+tail -n 50 ~/dr-ml/api.log
+tail -n 50 ~/dr-ml/ui.log
