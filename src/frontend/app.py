@@ -1,25 +1,48 @@
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.append(PROJECT_ROOT)
+
+def _project_root() -> Path:
+    for p in Path(__file__).resolve().parents:
+        if (p / "src").is_dir():
+            return p
+    raise RuntimeError("Could not locate project root (folder containing 'src')")
+
+
+sys.path.insert(0, str(_project_root()))
 
 import streamlit as st
 
-st.set_page_config(
-    page_title="DR. ML - Multi-Disease Predictor",
-    page_icon="🩺",
-    layout="centered"
-)
+from src.frontend.config.settings import Settings
+from src.frontend.ui import DISCLAIMER, render_backend_status, setup_page
 
-st.title("🧠 Dr. ML - Multi-Disease Predictor")
+API_URL = Settings().api_url
 
-st.write(
-    """
-Use the left sidebar to navigate:
-- 🩺 Diabetes Risk Predictor
-- ❤️ Heart Disease Risk Predictor
-"""
-)
+setup_page("Dr. ML", "🩺", "AI-assisted health risk screening")
 
-st.info("Make sure the FastAPI backend is running before using predictions.")
+render_backend_status(API_URL)
+
+st.write("")
+c1, c2 = st.columns(2)
+
+with c1:
+    with st.container(border=True):
+        st.subheader("🩺 Diabetes")
+        st.write("Risk estimate from 8 routine clinical measurements.")
+        st.page_link("pages/1_Diabetes.py", label="Open predictor →")
+
+with c2:
+    with st.container(border=True):
+        st.subheader("❤️ Heart Disease")
+        st.write("Risk estimate from 13 cardiac and clinical indicators.")
+        st.page_link("pages/2_Heart_Disease.py", label="Open predictor →")
+
+st.write("")
+st.subheader("How it works")
+s1, s2, s3 = st.columns(3)
+s1.markdown("**1. Enter details**  \nFill in the patient's clinical values.")
+s2.markdown("**2. Assess risk**  \nThe values are sent to a trained ML model.")
+s3.markdown("**3. Review result**  \nSee the estimated probability and risk level.")
+
+st.divider()
+st.caption(DISCLAIMER)
